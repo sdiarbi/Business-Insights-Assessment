@@ -19,7 +19,7 @@ with DAG(
     dag_id='bronze_dag',
     default_args=default_args,
     description='A DAG to create the bronze layer database and external tables in Athena',
-    schedule_interval=None,
+    schedule=None,
     start_date=datetime(2026, 1, 1),
     catchup=False,
     tags=['bronze', 'athena'],
