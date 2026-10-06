@@ -41,7 +41,7 @@ with DAG(
                 item_quantity int
             )
             ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
-            LOCATION '{BUCKET_NAME}/bronze/'
+            LOCATION '{BUCKET_NAME}/bronze/order_items/'
             TBLPROPERTIES ('skip.header.line.count'='1');
         """,
         database=DATABASE_NAME,
@@ -59,7 +59,7 @@ with DAG(
                 option_price decimal(10,2)
             )
             ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
-            LOCATION '{BUCKET_NAME}/bronze/'
+            LOCATION '{BUCKET_NAME}/bronze/order_item_options/'
             TBLPROPERTIES ('skip.header.line.count'='1');
         """,
         database=DATABASE_NAME,
@@ -79,7 +79,7 @@ with DAG(
                 day_of_week string
             )
             ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
-            LOCATION '{BUCKET_NAME}/bronze/'
+            LOCATION '{BUCKET_NAME}/bronze/date_dim/'
             TBLPROPERTIES ('skip.header.line.count'='1');
         """,
         database=DATABASE_NAME,
