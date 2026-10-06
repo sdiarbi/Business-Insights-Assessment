@@ -2,7 +2,7 @@ from datetime import datetime
 from airflow import DAG
 from airflow.providers.amazon.aws.operators.athena import AthenaOperator
 
-# Single bucket setup (updated to match your S3 console bucket name)
+# Single bucket setup
 BUCKET_NAME = "s3://business-insights-assessment-bucket"
 ATHENA_RESULTS = f"{BUCKET_NAME}/athena-results/"
 DATABASE_NAME = "bia_db"
@@ -17,7 +17,7 @@ with DAG(
     dag_id='bronze_dag',
     default_args=default_args,
     description='Medallion Bronze Layer: Registers raw S3 CSVs into Athena',
-    schedule_interval=None,
+    schedule=None,
     start_date=datetime(2026, 10, 1),
     catchup=False,
     tags=['medallion', 'bronze', 'athena'],
