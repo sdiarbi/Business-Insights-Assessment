@@ -9,7 +9,7 @@ ATHENA_RESULTS = f"{BUCKET_NAME}/athena-results/"
 with DAG(
     dag_id='bronze_dag',
     start_date=datetime(2026, 1, 1),
-    schedule_interval=None,
+    schedule=None,
     catchup=False,
     default_args={'retries': 1},
     tags=['bronze', 'athena'],
