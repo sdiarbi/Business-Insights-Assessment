@@ -23,11 +23,12 @@ with DAG(
     tags=['medallion', 'bronze', 'athena'],
 ) as dag:
 
-    # 1. Create Athena Database (no output_location needed for database creation)
+    # 1. Create Athena Database
     create_database = AthenaOperator(
         task_id='create_database',
         query=f"CREATE DATABASE IF NOT EXISTS {DATABASE_NAME};",
         database='default',
+        output_location=ATHENA_RESULTS,
     )
 
     # 2. Register Bronze Order Items Table
