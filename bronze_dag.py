@@ -2,30 +2,19 @@ from datetime import datetime
 from airflow import DAG
 from airflow.providers.amazon.aws.operators.athena import AthenaOperator
 
-# Define your configuration variables here
 BUCKET_NAME = "s3://business-insights-assessment-bucket"
 DATABASE_NAME = "bia_db"
 ATHENA_RESULTS = f"{BUCKET_NAME}/athena-results/"
 
-default_args = {
-    'owner': 'airflow',
-    'depends_on_past': False,
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'retries': 1,
-}
-
 with DAG(
     dag_id='bronze_dag',
-    default_args=default_args,
-    description='A DAG to create the bronze layer database and external tables in Athena',
-    schedule=None,
     start_date=datetime(2026, 1, 1),
+    schedule_interval=None,
     catchup=False,
+    default_args={'retries': 1},
     tags=['bronze', 'athena'],
 ) as dag:
 
-    # 1. Create the Database
     create_database = AthenaOperator(
         task_id='create_database',
         query=f"CREATE DATABASE IF NOT EXISTS {DATABASE_NAME};",
@@ -33,7 +22,6 @@ with DAG(
         output_location=ATHENA_RESULTS,
     )
 
-    # 2. Register Bronze Order Items Table
     create_bronze_order_items = AthenaOperator(
         task_id='create_bronze_order_items',
         query=f"""
@@ -60,7 +48,6 @@ with DAG(
         output_location=ATHENA_RESULTS,
     )
 
-    # 3. Register Bronze Order Item Options Table
     create_bronze_order_item_options = AthenaOperator(
         task_id='create_bronze_order_item_options',
         query=f"""
@@ -79,7 +66,6 @@ with DAG(
         output_location=ATHENA_RESULTS,
     )
 
-    # 4. Register Bronze Date Dimension Table
     create_bronze_date_dim = AthenaOperator(
         task_id='create_bronze_date_dim',
         query=f"""
@@ -100,7 +86,6 @@ with DAG(
         output_location=ATHENA_RESULTS,
     )
 
-    # Define task dependencies
     create_database >> [
         create_bronze_order_items,
         create_bronze_order_item_options,
