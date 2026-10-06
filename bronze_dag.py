@@ -2,28 +2,30 @@ from datetime import datetime
 from airflow import DAG
 from airflow.providers.amazon.aws.operators.athena import AthenaOperator
 
-# Single bucket setup
+# Define your configuration variables here
 BUCKET_NAME = "s3://business-insights-assessment-bucket"
-ATHENA_RESULTS = f"{BUCKET_NAME}/athena-results/"
 DATABASE_NAME = "bia_db"
+ATHENA_RESULTS = f"{BUCKET_NAME}/athena-results/"
 
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
+    'email_on_failure': False,
+    'email_on_retry': False,
     'retries': 1,
 }
 
 with DAG(
     dag_id='bronze_dag',
     default_args=default_args,
-    description='Medallion Bronze Layer: Registers raw S3 CSVs into Athena',
-    schedule=None,
-    start_date=datetime(2026, 10, 1),
+    description='A DAG to create the bronze layer database and external tables in Athena',
+    schedule_interval=None,
+    start_date=datetime(2026, 1, 1),
     catchup=False,
-    tags=['medallion', 'bronze', 'athena'],
+    tags=['bronze', 'athena'],
 ) as dag:
 
-    # 1. Create Athena Database
+    # 1. Create the Database
     create_database = AthenaOperator(
         task_id='create_database',
         query=f"CREATE DATABASE IF NOT EXISTS {DATABASE_NAME};",
@@ -51,7 +53,7 @@ with DAG(
                 item_quantity int
             )
             ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
-            LOCATION '{BUCKET_NAME}/bronze/order_items/'
+            LOCATION '{BUCKET_NAME}/bronze/'
             TBLPROPERTIES ('skip.header.line.count'='1');
         """,
         database=DATABASE_NAME,
@@ -67,11 +69,10 @@ with DAG(
                 lineitem_id string,
                 option_group_name string,
                 option_name string,
-                option_price decimal(10,2),
-                option_quantity int
+                option_price decimal(10,2)
             )
             ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
-            LOCATION '{BUCKET_NAME}/bronze/order_item_options/'
+            LOCATION '{BUCKET_NAME}/bronze/'
             TBLPROPERTIES ('skip.header.line.count'='1');
         """,
         database=DATABASE_NAME,
@@ -84,25 +85,24 @@ with DAG(
         query=f"""
             CREATE EXTERNAL TABLE IF NOT EXISTS {DATABASE_NAME}.bronze_date_dim (
                 date_key string,
-                day_of_week string,
-                week int,
-                month string,
+                date_value string,
                 year int,
-                is_weekend boolean,
-                is_holiday boolean,
-                holiday_name string
+                quarter int,
+                month int,
+                day int,
+                day_of_week string
             )
             ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
-            LOCATION '{BUCKET_NAME}/bronze/date_dim/'
+            LOCATION '{BUCKET_NAME}/bronze/'
             TBLPROPERTIES ('skip.header.line.count'='1');
         """,
         database=DATABASE_NAME,
         output_location=ATHENA_RESULTS,
     )
 
-    # Execution Flow: Database is created first, then all 3 tables register in parallel
+    # Define task dependencies
     create_database >> [
         create_bronze_order_items,
         create_bronze_order_item_options,
-        create_bronze_date_dim
+        create_bronze_date_dim,
     ]
