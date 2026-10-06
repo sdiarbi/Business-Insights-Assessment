@@ -2,8 +2,8 @@ from datetime import datetime
 from airflow import DAG
 from airflow.providers.amazon.aws.operators.athena import AthenaOperator
 
-# Single bucket setup
-BUCKET_NAME = "s3://business-insights-assessment-raw-bucket"
+# Single bucket setup (updated to match your S3 console bucket name)
+BUCKET_NAME = "s3://business-insights-assessment-bucket"
 ATHENA_RESULTS = f"{BUCKET_NAME}/athena-results/"
 DATABASE_NAME = "bia_db"
 
@@ -23,12 +23,11 @@ with DAG(
     tags=['medallion', 'bronze', 'athena'],
 ) as dag:
 
-    # 1. Create Athena Database
+    # 1. Create Athena Database (no output_location needed for database creation)
     create_database = AthenaOperator(
         task_id='create_database',
         query=f"CREATE DATABASE IF NOT EXISTS {DATABASE_NAME};",
         database='default',
-        output_location=ATHENA_RESULTS,
     )
 
     # 2. Register Bronze Order Items Table
