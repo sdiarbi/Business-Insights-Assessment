@@ -42,7 +42,10 @@ with DAG(
             )
             ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
             LOCATION '{BUCKET_NAME}/bronze/order_items/'
-            TBLPROPERTIES ('skip.header.line.count'='1');
+            TBLPROPERTIES (
+                'skip.header.line.count'='1',
+                'use.null.for.invalid.data' = 'true'
+            );
         """,
         database=DATABASE_NAME,
         output_location=ATHENA_RESULTS,
@@ -60,7 +63,10 @@ with DAG(
             )
             ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
             LOCATION '{BUCKET_NAME}/bronze/order_item_options/'
-            TBLPROPERTIES ('skip.header.line.count'='1');
+            TBLPROPERTIES (
+                'skip.header.line.count'='1',
+                'use.null.for.invalid.data' = 'true'
+            );
         """,
         database=DATABASE_NAME,
         output_location=ATHENA_RESULTS,
@@ -80,7 +86,10 @@ with DAG(
             )
             ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
             LOCATION '{BUCKET_NAME}/bronze/date_dim/'
-            TBLPROPERTIES ('skip.header.line.count'='1');
+            TBLPROPERTIES (
+                'skip.header.line.count'='1',
+                'use.null.for.invalid.data' = 'true'
+            );
         """,
         database=DATABASE_NAME,
         output_location=ATHENA_RESULTS,
