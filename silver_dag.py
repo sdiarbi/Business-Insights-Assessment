@@ -15,7 +15,6 @@ with DAG(
     tags=['silver', 'athena'],
 ) as dag:
 
-    # 1. Create Silver Order Items (cleaning timestamps & types)
     create_silver_order_items = AthenaOperator(
         task_id='create_silver_order_items',
         query=f"""
@@ -45,7 +44,6 @@ with DAG(
         output_location=ATHENA_RESULTS,
     )
 
-    # 2. Create Silver Order Item Options
     create_silver_order_item_options = AthenaOperator(
         task_id='create_silver_order_item_options',
         query=f"""
@@ -67,7 +65,6 @@ with DAG(
         output_location=ATHENA_RESULTS,
     )
 
-    # 3. Create Silver Date Dimension
     create_silver_date_dim = AthenaOperator(
         task_id='create_silver_date_dim',
         query=f"""
@@ -90,7 +87,6 @@ with DAG(
         output_location=ATHENA_RESULTS,
     )
 
-    # Task Dependencies (run in parallel or sequence)
     [
         create_silver_order_items,
         create_silver_order_item_options,
