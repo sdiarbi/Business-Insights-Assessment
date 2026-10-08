@@ -42,16 +42,3 @@ Specialized aggregate tables designed to answer key business questions and drive
 
 ---
 
-## 📁 Repository Structure
-
-```text
-├── dags/
-│   ├── bronze_dag.py       # Registers raw external tables in Athena
-│   ├── silver_dag.py       # Cleans, transforms, and converts data to Parquet
-│   └── gold_dag.py         # Computes and materializes the 7 Gold metric tables
-├── sql/
-│   ├── bronze/             # Bronze table DDLs
-│   ├── silver/             # Silver transformation queries
-│   └── gold/               # Gold aggregate queries
-└── README.md
-
