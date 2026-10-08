@@ -15,6 +15,7 @@ with DAG(
     tags=['silver', 'athena'],
 ) as dag:
 
+    # 1. Create Silver Order Items (Safely cleaning and casting types)
     create_silver_order_items = AthenaOperator(
         task_id='create_silver_order_items',
         query=f"""
@@ -26,7 +27,7 @@ with DAG(
             SELECT 
                 TRIM(app_name) AS app_name,
                 TRIM(restaurant_id) AS restaurant_id,
-                CAST(creation_time_utc AS timestamp) AS creation_time,
+                TRY(CAST(NULLIF(TRIM(creation_time_utc), '') AS timestamp)) AS creation_time,
                 TRIM(order_id) AS order_id,
                 TRIM(user_id) AS user_id,
                 TRIM(printed_card_number) AS printed_card_number,
@@ -44,6 +45,7 @@ with DAG(
         output_location=ATHENA_RESULTS,
     )
 
+    # 2. Create Silver Order Item Options
     create_silver_order_item_options = AthenaOperator(
         task_id='create_silver_order_item_options',
         query=f"""
@@ -65,6 +67,7 @@ with DAG(
         output_location=ATHENA_RESULTS,
     )
 
+    # 3. Create Silver Date Dimension (Safely cleaning and casting dates)
     create_silver_date_dim = AthenaOperator(
         task_id='create_silver_date_dim',
         query=f"""
@@ -75,7 +78,7 @@ with DAG(
             ) AS 
             SELECT 
                 TRIM(date_key) AS date_key,
-                CAST(date_value AS date) AS calendar_date,
+                TRY(CAST(NULLIF(TRIM(date_value), '') AS date)) AS calendar_date,
                 year,
                 quarter,
                 month,
@@ -87,6 +90,7 @@ with DAG(
         output_location=ATHENA_RESULTS,
     )
 
+    # Task Dependencies
     [
         create_silver_order_items,
         create_silver_order_item_options,
